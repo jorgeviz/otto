@@ -1,8 +1,4 @@
 """Convenience wrappers for flask.flash() with special-character handling.
-
-With PyCharm inspections it's easy to see which custom flash messages are available. If you directly use flask.flash(),
-the "type" of message (info, warning, etc.) is a string passed as a second argument to the function. With this file
-PyCharm will tell you which type of messages are supported.
 """
 
 from flask import flash
@@ -11,11 +7,12 @@ from flask import flash
 def _escape(message):
     """Escape some characters in a message. Make them HTML friendly.
 
-    Positional arguments:
-    message -- the string to process.
+    Params:
+    -----
+    - message : (str) Text to process.
 
     Returns:
-    Escaped string.
+    - (str) Escaped string.
     """
     translations = {
         '"': '&quot;',
