@@ -3,3 +3,5 @@ env/
 notebooks/
 env2/
 data/
+*.pyc
+__pycache__/
