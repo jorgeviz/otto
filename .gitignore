@@ -1,3 +1,5 @@
 .envvars
 env/
 notebooks/
+env2/
+data/
