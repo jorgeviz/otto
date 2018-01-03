@@ -1,4 +1,4 @@
-# OTTO Crypto Auto-trader
+# OTTO Crypto Trader
 
 Web Application to retrieve cryptocurrencies' prices and execute trades along predefined rules over different exchanges.
 

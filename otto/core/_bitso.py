@@ -27,8 +27,59 @@ class Bitso(object):
     		self.api = bitso.Api()
         # Helpers
         # self.oh = ottoHelpers()
+        # Show Books
+        self.get_books()
+        # Show Fees
+        self.get_fees()
+        # Show Account limits
+        self.get_limits()
+        # Get Balances
 
-    def books(self, _show=False):
+    #def get_auth(self):
+        # import time
+        # import hmac
+        # import hashlib
+        # import requests
+
+
+        # bitso_key = "BITSO_KEY"
+        # bitso_secret = "BITSO_SECRET"
+        # nonce =  str(int(round(time.time() * 1000)))
+        # http_method = "GET"
+        # request_path = "/v3/balance/"
+        # json_payload = ""
+
+        # # Create signature
+        # message = nonce+http_method+request_path+json_payload
+        # signature = hmac.new(bitso_secret.encode('utf-8'),
+        #                                             message.encode('utf-8'),
+        #                                             hashlib.sha256).hexdigest()
+
+        # # Build the auth header
+        # auth_header = 'Bitso %s:%s:%s' % (bitso_key, nonce, signature)
+
+        # # Send request
+        # response = requests.get("https://api.bitso.com/v3/balance/", headers={"Authorization": auth_header})
+        # print response.content
+
+    def get_limits(self):
+        """ Method to show account status
+        """
+        self.acc_status = self.api.account_status()
+        print("Daily Limit: $", self.acc_status.daily_limit)
+        print("Daily Remaining: $", self.acc_status.daily_remaining, '\n')
+
+    def get_fees(self):
+        """ Method to show fees
+        """
+        _fees = self.api.fees()
+        # Obtain JSON of fees
+        self.fees = [{_f: float(_fees.__dict__[_f].fee_percent)} \
+                    for _f in _fees.__dict__.keys()\
+                        if _f in self.books_avail]
+        print('Fees:', pf(self.fees), '\n')
+
+    def get_books(self, _show=False):
     	""" Method to show available books in bitso
 
             Params:
@@ -51,7 +102,7 @@ class Bitso(object):
         if _show:
             print(pf(self.books))
         self.books_avail = [_x['book'] for _x in self.books]
-    	print('Available books:', self.books_avail)
+    	print('Available books:', pf(self.books_avail), '\n')
 
 
     def price(self, _book):
