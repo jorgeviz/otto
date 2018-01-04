@@ -10,6 +10,9 @@ Available Currencies
 
 - Bitcoin
 - Ethereum
+- Litecoin
+- Ripple
+- Mexican Peso
 
 
 ## Status
