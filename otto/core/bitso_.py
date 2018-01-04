@@ -339,6 +339,12 @@ class BitsoTrade(Bitso):
             - _pair: (str) Currency-Pair to Trade (Major_minor)
             - _side: (str, 'buy' | 'sell')  Trading Position
             - _major_amount: (float) Major amount to trade
+            - only_check: (bool) Set False if want to execute order, 
+            otherwise just verifies if is a valid transaction
+            
+            Returns:
+            -----
+            - (bool) Transaction Status
         """
         print("""Executing transaction:
         ---
