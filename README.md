@@ -1,6 +1,6 @@
 # OTTO Crypto Trader
 
-Web Application to retrieve cryptocurrencies' prices and execute trades along predefined rules over different exchanges.
+Application to retrieve cryptocurrencies' prices and execute trades along predefined rules over different exchanges.
 
 Available Exchanges:
 
@@ -21,7 +21,7 @@ Currently testing trades over some crypto currencies with console only deploymen
 
 - Define rules in main script execution
 - Implement all currencies available in Bitso for automatic trading
-- Add plots, metrics and WebUI to change rules
+- Add plots, metrics and UI to change rules
 - Implement executables for deploy in Multiple platforms
 
 ## LICENSE

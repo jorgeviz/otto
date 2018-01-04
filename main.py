@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from otto.core._bitso import Bitso
-import time
+# import time
 import os
+from otto.core.bitso_ import BitsoTrade
 # from otto.helpers import ottoHelpers  # Need to update to Python3
 
 # Global Vars
@@ -16,15 +16,15 @@ def main():
     _b_key = os.getenv('BITSO_API_KEY')
     _b_secr = os.getenv('BITSO_API_SECRET')
     # Bitso class initialization
-    _bitso = Bitso(_b_key, _b_secr)
+    _bitso = BitsoTrade(_b_key, _b_secr)
     # Verify prices of a given pair
-    _curr = "eth_mxn"  # Change this to verify all
-    print('Requesting {} price...'.format(_curr))
-    from pprint import pprint
-    pprint(_bitso.price(_curr))
-
+    curr_pair = "ltc_mxn"  # Change this to verify all
+    print('Requesting last {} price...'.format(curr_pair))
+    print('Last {} price'.format(curr_pair), _bitso.price(curr_pair)['last'])
+    # Set order
+    _bitso.set_market_order(curr_pair, 'buy', 0.002, only_check=True)
 
 if __name__ == '__main__':
-    print('Initializing OttoCT v0.0.1.beta...')
+    print('Initializing OttoCT v0.0.1.beta...', '\n')
     main()
     print('Done!')

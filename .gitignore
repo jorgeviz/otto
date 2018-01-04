@@ -5,3 +5,4 @@ env2/
 data/
 *.pyc
 __pycache__/
+.vscode/
