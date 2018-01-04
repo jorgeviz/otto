@@ -37,7 +37,7 @@ class Bitso(object):
     	else:
     		self.api = bitso.Api()
         # Show Books
-        self.get_books(True) # Set True to show limits
+        self.get_books() # Set True to show limits
         # Show Fees
         self.get_fees()
         # Show Account limits
@@ -231,11 +231,11 @@ class BitsoTrade(Bitso):
             return False
         # Fetch book limit info
         _tbook = [_b for _b in self.books if _pair == _b['book']][0]
-        # Compare is above minimum amount
+        # Compare if above minimum amount
         if float(amount) < float(_tbook['minimum_amount']):
             print('{} is too small to perform transaction'.format(amount))
             return False
-        # Compare is below maximum amount
+        # Compare if below maximum amount
         if float(amount) > float(_tbook['maximum_amount']):
             print('{} is too big to perform transaction'.format(amount))
             return False
@@ -369,7 +369,8 @@ class BitsoTrade(Bitso):
                     'book': _pair,
                     'side': _side,
                     'order_type': 'market',
-                    'major': str(_major_amount)
+                    'major': str(_major_amount),
+                    'created_at': str(datetime.datetime.utcnow())
                 })
                 print('Transaction correctly executed!')
                 # Save Transaction into file

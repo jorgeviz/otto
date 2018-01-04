@@ -8,11 +8,13 @@ Available Exchanges:
 
 Available Currencies
 
-- Bitcoin
-- Ethereum
-- Litecoin
-- Ripple
-- Mexican Peso
+- Bitcoin (BTC)
+- Bitcoin Cash (BCH)
+- Ethereum (ETH)
+- Ethereum Classic (ETC)
+- Litecoin (LTC)
+- Ripple (XRP)
+- Mexican Peso (MXN)
 
 
 ## Status

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-# import time
 import os
 from otto.core.bitso_ import BitsoTrade
 # from otto.helpers import ottoHelpers  # Need to update to Python3
@@ -23,6 +22,8 @@ def main():
     print('Last {} price'.format(curr_pair), _bitso.price(curr_pair)['last'])
     # Set order
     _bitso.set_market_order(curr_pair, 'buy', 0.002, only_check=True)
+    # Get Balance
+    _bitso.get_balances()
 
 if __name__ == '__main__':
     print('Initializing OttoCT v0.0.1.beta...', '\n')
