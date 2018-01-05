@@ -606,7 +606,7 @@ class BitsoTrade(Bitso):
                     self.set_market_order(vp,
                                     _action,
                                     config['rules'][vp]['major_amount'],
-                                    only_check=True)  # To actually perform Orders, set False
+                                    only_check=False)  # To actually perform Orders, set False
                     print("#####################")
                     # Reset Baseline
                     self.set_baseline(vp)
