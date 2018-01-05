@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import os
+import json
 from otto.core.bitso_ import BitsoTrade
 # from otto.helpers import ottoHelpers  # Need to update to Python3
 
@@ -16,16 +17,20 @@ def main():
     _b_secr = os.getenv('BITSO_API_SECRET')
     # Bitso class initialization
     _bitso = BitsoTrade(_b_key, _b_secr)
-    # Verify prices of a given pair
-    curr_pair = "ltc_mxn"  # Change this to verify all
-    print('Requesting last {} price...'.format(curr_pair))
-    print('Last {} price'.format(curr_pair), _bitso.price(curr_pair)['last'])
+    # Retrieve all currency-pair prices
+    #_bitso.all_prices()
     # Set order
-    _bitso.set_market_order(curr_pair, 'buy', 0.002, only_check=True)
+    #curr_pair = "ltc_mxn"
+    #_bitso.set_market_order(curr_pair, 'buy', 0.002, only_check=True)
     # Get Balance
-    _bitso.get_balances()
+    #_bitso.get_balances()
+    # Fetch Config File
+    with open('config.json', 'r') as cfg:
+        config = json.loads(cfg.read())
+    # Set Automatic Trading on
+    _bitso.automate(config)
 
 if __name__ == '__main__':
-    print('Initializing OttoCT v0.0.1.beta...', '\n')
+    print('\nInitializing OttoCT v0.0.1.beta...', '\n')
     main()
     print('Done!')

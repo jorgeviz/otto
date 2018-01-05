@@ -6,6 +6,7 @@ from pprint import pformat as pf
 import datetime
 import csv
 import time
+import sys
 # from ..helpers import ottoHelpers  # Need to update to Python3
 
 
@@ -76,6 +77,8 @@ class Bitso(object):
         """ Method to retrieve and show account status
         """
         self.acc_status = self.api.account_status()
+        # wait for a sec.
+        time.sleep(1)
         print("Daily Limit: $", self.acc_status.daily_limit)
         print("Daily Remaining: $", self.acc_status.daily_remaining, '\n')
 
@@ -83,6 +86,8 @@ class Bitso(object):
         """ Method to retrieve and show fees
         """
         _fees = self.api.fees()
+        # wait for a sec.
+        time.sleep(1)
         # Obtain dict of fees
         self.fees = {_f: float(_fees.__dict__[_f].fee_percent) \
                     for _f in _fees.__dict__.keys()\
@@ -93,6 +98,8 @@ class Bitso(object):
         """ Method to retrieve and show account balances
         """
         _balances = self.api.balances()
+        # wait for a sec.
+        time.sleep(1)
         self.currencies = _balances.currencies
         self.balances = {_b: {
                             'available': float(_bv.__dict__['available']),
@@ -101,7 +108,7 @@ class Bitso(object):
                         for _b, _bv in _balances.__dict__.items() \
                             if _b != 'currencies'}
         print('Currencies: ', pf(self.currencies), '\n')
-        print('Balances: ', pf(self.balances), '\n')
+        print('Balances: ', pf(self.balances), '\n')        
 
     def get_books(self, _show=False):
     	""" Method to show available books in bitso
@@ -113,6 +120,8 @@ class Bitso(object):
         try:
             # Books consultation
             _av_books = requests.get("https://api.bitso.com/v3/available_books/")
+            # wait for a sec.
+            time.sleep(1)
         except requests.exceptions.RequestException as _rexc:
             print(_rexc)
             return None
@@ -154,6 +163,8 @@ class Bitso(object):
         try:
             # Retrieve Book
             _p = requests.get('https://api.bitso.com/v3/ticker/?book={}'.format(_book)).json()
+            # wait for a sec.
+            time.sleep(1)
         except Exception as e:
             print(e)
             return None
@@ -162,38 +173,61 @@ class Bitso(object):
             print('Request has not been successful!')
             return None
         # Save for later analysis
-        if not self.save_csv(_p['payload']):
+        if not self.save_csv(_p['payload'], _p['payload']['book']):
             print('Could not save data into file')
         return _p['payload']
 
-    def save_csv(self, _price):
+    def all_prices(self, valid='all'):
+        """ Method to retrieve all prices from valid currencies
+
+            Params:
+            -----
+            valid: (str | list) 'all' if wants to perform over each currency, otherwise send list of Currency-Pairs
+        """
+        # Validate currencies
+        if valid == 'all':
+            _pairs = self.books_avail
+        else:
+            _pairs = [_v for _v in valid if _v in self.books_avail]
+        curr_prices = {}
+        # Loop over each currency to retrieve price
+        for _c in _pairs:
+            curr_prices[_c] = float(self.price(_c)['last'])
+            # Wait for 1 sec. to avoid being blocked
+            time.sleep(1)
+        print('Current Currency-Pair prices: \n', pf(curr_prices), '\n')
+        return curr_prices
+            
+
+    def save_csv(self, _dict, f_name):
         """ Method to convert JSON exchange values and save it into CSV dumps
 
             Params:
-            - _price : (dict) Pair exchange values
+            - _dict: (dict) Data Values
+            - f_name: (str) File Name
 
             Returns:
             - (bool) Saving Status
         """
         try:
             # Verify if file existed
-            f = open('data/{}.csv'.format(_price['book']), 'r')
+            f = open('data/{}.csv'.format(f_name), 'r')
             print('File existed, appending...')
             f.close()
         except IOError:
             # If new file, write headers
-            f = open('data/{}.csv'.format(_price['book']), 'w')
+            f = open('data/{}.csv'.format(f_name), 'w')
             print('Creating file with headers')
-            writer = csv.DictWriter(f, fieldnames=list(_price.keys()))
+            writer = csv.DictWriter(f, fieldnames=list(_dict.keys()))
             writer.writeheader()
             print('File created, appending...')
             f.close()
         try:
-            # Append price value into File
-            f = open('data/{}.csv'.format(_price['book']), 'a')
-            writer = csv.DictWriter(f, fieldnames=list(_price.keys()))
-            writer.writerow(_price)
-            print('Saved price data!')
+            # Append data value into File
+            f = open('data/{}.csv'.format(f_name), 'a')
+            writer = csv.DictWriter(f, fieldnames=list(_dict.keys()))
+            writer.writerow(_dict)
+            print('Saved {} data!'.format(f_name))
         except Exception as e:
             print(e)
             return False
@@ -201,7 +235,12 @@ class Bitso(object):
 
 
 class BitsoTrade(Bitso):
-    """ Class to perform trades over Bitso exchange
+    """ Class to perform trades over Bitso exchange, which inheritates
+        all methods from Bitso class.
+
+        BitsoTrade attrs:
+        - trade_prices: (dict) Dictionary of last prices indexed by Currency-pairs
+        - base_lines: (dict) Dictionary of base_line indexed by Currency_pairs
     """
     
     def __init__(self, api_key, secret):
@@ -209,6 +248,8 @@ class BitsoTrade(Bitso):
         """
         # Initialize Bitso Parent Class
         super(BitsoTrade, self).__init__(api_key, secret)
+        self.trade_prices = {}
+        self.base_lines = {}
 
     def in_bounds(self, amount, _pair):
         """ Method to check if transaction is within trading bounds in Bitso
@@ -284,20 +325,33 @@ class BitsoTrade(Bitso):
         # If selling major compute balance directly
         if _selling == _pair.split('_')[0]:
             # If not enough balance
+            print('Selling, so checking Major to verify balance')
             if amount > self.balances[_selling]['available']:
-                print('{} is not enough balance in {} to perform transaction'
+                print('Balance {} in {} is not enough to perform transaction for {}'
                     .format(self.balances[_selling]['available'],
-                            _selling))
+                            _selling,
+                            amount))
                 return None
+            print('Balance {} in {} enough to sell {}'
+                .format(self.balances[_selling]['available'],
+                        _selling,
+                        amount))
+            return self.balances[_selling]['available']
         # If selling minor, get last price of exchange between currencies
         exc_price = self.price(_pair)
         tmp_balance = self.balances[_selling]['available']
         # Converting minor into Major currency equivalence to validate correct balance
+        print('Buying, so converting minor into Major to verify balance')
         if (amount * float(exc_price['last'])) > tmp_balance:
-                print('{} is not enough balance in {} to perform transaction'
+                print('{} is not enough balance in {} to perform transaction for {}'
                     .format(tmp_balance,
-                            _selling))
+                            _selling,
+                            amount * float(exc_price['last'])))
                 return None
+        print('Balance {} in {} enough to sell {}'
+                .format(tmp_balance,
+                        _selling,
+                        amount * float(exc_price['last'])))
         return tmp_balance
 
 
@@ -365,6 +419,8 @@ class BitsoTrade(Bitso):
                                         side=_side,
                                         order_type='market',
                                         major=str(_major_amount))
+                # wait for some seconds...
+                time.sleep(3)
                 _transac.update({
                     'book': _pair,
                     'side': _side,
@@ -374,44 +430,190 @@ class BitsoTrade(Bitso):
                 })
                 print('Transaction correctly executed!')
                 # Save Transaction into file
-                if not self.save_transac(_transac):
+                if not self.save_csv(_transac, 'transactions'):
                     print('Could not save transactional data.')
             except Exception as e:
                 print('Could not execute transaction:', e)
                 return False
-        # wait for some seconds...
-        time.sleep(3)
         return True
 
-    def save_transac(self, _transac):
-        """ Method to convert dict transaction values and save it into CSV dumps
+    def update_series(self, valid):
+        """ Method to cache prices from valid currencies
 
             Params:
-            - _transac : (dict) Transaction values
+            -----
+            valid: (str | list) 'all' if wants to perform over each currency, otherwise send list of Currency-Pairs
+        """
+        if valid != 'all' and not isinstance(valid, list):
+            print('Valid Pairs param has incorrect format!')
+            sys.exit()
+        self.trade_prices = self.all_prices(valid)
+        print('Trade prices successfully updated!')
+
+    def set_baseline(self, pair):
+        """ Method to set baseline to certain currency-pair using last known price
+
+            Params:
+            -----
+            - pair: (str) Currency-Pair
+        """
+        if pair not in self.books_avail:
+            print('{} Pair is not supported!'.format(pair))
+            sys.exit()
+        self.base_lines.update({
+            pair: self.trade_prices[pair]
+        })
+        print('{} baseline successfully updated!'.format(pair))
+
+    def config_valid(self, config):
+        """ Method to verify if config object is valid
+
+            Params:
+            -----
+            - config: (dict) JSON file with all needed trade rules
 
             Returns:
-            - (bool) Saving Status
+            -----
+            - (bool) Config Validation
         """
-        try:
-            # Verify if file existed
-            f = open('data/transactions.csv', 'r')
-            print('File existed, appending...')
-            f.close()
-        except IOError:
-            # If new file, write headers
-            f = open('data/transactions.csv', 'w')
-            print('Creating file with headers')
-            writer = csv.DictWriter(f, fieldnames=list(_transac.keys()))
-            writer.writeheader()
-            print('File created, appending...')
-            f.close()
-        try:
-            # Append price value into File
-            f = open('data/transactions.csv', 'a')
-            writer = csv.DictWriter(f, fieldnames=list(_transac.keys()))
-            writer.writerow(_transac)
-            print('Saved transaction data!')
-        except Exception as e:
-            print(e)
-            return False
+        if 'valid_pairs' not in config:
+            print('Valid Pairs param is missing!')
+            sys.exit()
+        if 'rules' not in config:
+            print('Valid Pairs param is missing!')
+            sys.exit()
+        if (set(config['rules'].keys()) != set(config['valid_pairs'])) or \
+                (len(config['rules'].keys()) != len(config['valid_pairs'])):
+            print('Valid Pairs and Rules must match!')
+            sys.exit()
         return True
+
+    def evaluate_rule(self, pair, rule):
+        """ Method to evaluate which action must be executed after defined rules.
+            * If trading_price > (base_line + rule_selling_bound) Then: sell
+            * Else if trading_price > (base_line + rule_selling_bound) Then: buy
+            * Else: None
+
+            Params:
+            -----
+            - pair: (str) Currency Pair
+            - rule: (dict) Rule with selling and buying bounds
+
+            Returns:
+            -----
+            - (str | NoneType) Trading Position ('buy' | 'sell' | None)
+        """
+        # Boundaries
+        upper_bound = self.base_lines[pair] + (self.base_lines[pair] * rule['selling_major_bound'])
+        lower_bound = self.base_lines[pair] + (self.base_lines[pair] * rule['buying_major_bound'])
+        # Selling evaluation
+        if self.trade_prices[pair] > upper_bound:
+            print('Selling: {} is MORE EXPENSIVE than {}'.format(self.trade_prices[pair], self.base_lines[pair]))
+            return 'sell'
+        elif self.trade_prices[pair] < lower_bound:
+            print('Buying: {} is CHEAPER than {}'.format(self.trade_prices[pair], self.base_lines[pair]))
+            return 'buy'
+        else:
+            print('Nothing: {} is almost the same than {}'.format(self.trade_prices[pair], self.base_lines[pair]))
+            return None
+
+    def get_acumulate(self):
+        """ Method to show Acumulated Balance and store results
+        """
+        # Update Balances
+        self.get_balances()
+        # Total Balances dictionary
+        b_dict = {_k+'_total': _v['total'] for _k,_v in self.balances.items()}
+        # MXN equivalences
+        mxn_equivs = []
+        for _k, _v in self.balances.items():
+            if _k == 'mxn':
+                # Append MXN Peso
+                mxn_equivs.append(_v['total'])
+                continue
+            for _ba in self.books_avail:
+                if _k+'_mxn' == _ba:
+                    # Append Direct MXN convertion
+                    mxn_equivs.append(_v['total'] * self.trade_prices[_ba])
+                    break
+                if _k+'_btc' == _ba:
+                    # Append BTC-MXN convertion
+                    mxn_equivs.append(_v['total'] 
+                                    * self.trade_prices[_ba]
+                                    * self.trade_prices['btc_mxn'])
+                    break                
+        # Update acumulate in dict
+        b_dict['acumulated_mxn'] = sum(mxn_equivs)
+        b_dict['created_at'] = str(datetime.datetime.utcnow())
+        print(""" Acumulated Balances: 
+        ----
+        ----
+        {}
+        ----
+        ----
+        """.format(pf(b_dict)))
+        # Write balance in file   
+        self.save_csv(b_dict, 'balances')
+
+    def automate(self, config):
+        """ Method to apply orders within defined rules in the config file.
+
+            Params:
+            - config: (dict) JSON file with all needed trade rules
+            >>> {
+                'valid_pairs': ['btc_mxn', 'eth_mxn'],
+                'rules': {
+                    'btc_mxn':{
+                        'selling_major_bound': 3,  # In %
+                        'buying_major_bound': -1.8,  # In %
+                        'major_amount' : 0.00003
+                    },
+                    'eth_mxn':{
+                        'selling_major_bound': 2,  # In %
+                        'buying_major_bound': -1.8,  # In %
+                        'major_amount' : 0.003
+                    }
+                }
+            }
+        """
+        # Validate Config file
+        self.config_valid(config)
+        # Initialize
+        self.update_series(config['valid_pairs'])
+        # For each currency-pair
+        for vp in config['valid_pairs']:
+            # Set Baseline
+            self.set_baseline(vp)
+        try:
+            while True:
+                # Performance Delay
+                time.sleep(5)  # Set to 5 secs.
+                # Update Price Series
+                self.update_series(config['valid_pairs'])
+                print()
+                # For each currency-pair 
+                for vp in config['valid_pairs']:
+                    # Evaluate action
+                    print('Evaluating {}...'.format(vp))
+                    _action = self.evaluate_rule(vp, config['rules'][vp])
+                    if not _action:
+                        # Passing action
+                        print('Not action required!')
+                        continue
+                    print("#####################")
+                    print('Trying to perform {} in {}'.format(_action, vp))
+                    # If exceeds limits, perform order
+                    self.set_market_order(vp,
+                                    _action,
+                                    config['rules'][vp]['major_amount'],
+                                    only_check=True)  # To actually perform Orders, set False
+                    print("#####################")
+                    # Reset Baseline
+                    self.set_baseline(vp)
+                    # Get Acum Balances
+                    self.get_acumulate()
+                print()
+        except KeyboardInterrupt:
+            print('\n Stoping trading!!!')
+            import sys 
+            sys.exit()
