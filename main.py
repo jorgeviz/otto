@@ -1,13 +1,17 @@
-# -*- coding: utf-8 -*-
+""" 
+Otto CT main console module
+
+Module to initialize automated trading importing rules from
+config file, all connection and validations are done over 
+Bitso and BitsoTrade classes located inte th otto.core package.
+
+Status: beta-testing
+"""
 from __future__ import print_function
 import os
 import json
 from otto.core.bitso_ import BitsoTrade
 # from otto.helpers import ottoHelpers  # Need to update to Python3
-
-# Global Vars
-#_oh = ottoHelpers()
-#_oh.logger.info('Helpers are ON!')
 
 def main():
     """ Main Method to execute Otto in console
@@ -17,20 +21,21 @@ def main():
     _b_secr = os.getenv('BITSO_API_SECRET')
     # Bitso class initialization
     _bitso = BitsoTrade(_b_key, _b_secr)
-    # Retrieve all currency-pair prices
-    #_bitso.all_prices()
-    # Set order
-    #curr_pair = "ltc_mxn"
-    #_bitso.set_market_order(curr_pair, 'buy', 0.002, only_check=True)
-    # Get Balance
-    #_bitso.get_balances()
     # Fetch Config File
     with open('config.json', 'r') as cfg:
         config = json.loads(cfg.read())
     # Set Automatic Trading on
-    _bitso.automate(config)
+    try:
+        _bitso.automate(config)
+    except KeyboardInterrupt:
+        print('Shutting down...')        
 
 if __name__ == '__main__':
-    print('\nInitializing OttoCT v0.0.1.beta...', '\n')
+    print('******************************************')
+    print('******************************************')
+    print('+++++ Initializing OttoCT v0.0.1.beta ++++')
+    print('******************************************')
+    print('******************************************')
+    # Calling Main method
     main()
     print('Done!')

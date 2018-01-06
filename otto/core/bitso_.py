@@ -164,7 +164,7 @@ class Bitso(object):
             # Retrieve Book
             _p = requests.get('https://api.bitso.com/v3/ticker/?book={}'.format(_book)).json()
             # wait for a sec.
-            time.sleep(1)
+            time.sleep(1.5)
         except Exception as e:
             print(e)
             return None
@@ -192,9 +192,20 @@ class Bitso(object):
         curr_prices = {}
         # Loop over each currency to retrieve price
         for _c in _pairs:
-            curr_prices[_c] = float(self.price(_c)['last'])
+            max_tries = 3
+            for _try in range(max_tries):
+                try:
+                    curr_prices[_c] = float(self.price(_c)['last'])
+                    break
+                except TypeError:
+                    # In case of type error
+                    print('Could not fetch price, retrying...')
+                    time.sleep(2)
+                    if _try == (max_tries-1):
+                        print('Exceeded trials, shutting down!')
+                        sys.exit()
             # Wait for 1 sec. to avoid being blocked
-            time.sleep(1)
+            time.sleep(0.5)
         print('Current Currency-Pair prices: \n', pf(curr_prices), '\n')
         return curr_prices
             
@@ -515,6 +526,7 @@ class BitsoTrade(Bitso):
             return 'buy'
         else:
             print('Nothing: {} is almost the same than {}'.format(self.trade_prices[pair], self.base_lines[pair]))
+            print('Decision:   {}   >   {}   <    {}'.format(lower_bound, self.trade_prices[pair], upper_bound))
             return None
 
     def get_acumulate(self):
@@ -587,7 +599,7 @@ class BitsoTrade(Bitso):
         try:
             while True:
                 # Performance Delay
-                time.sleep(5)  # Set to 5 secs.
+                time.sleep(2)  # Set to 2 secs.
                 # Update Price Series
                 self.update_series(config['valid_pairs'])
                 print()
