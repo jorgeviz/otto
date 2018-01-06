@@ -36,13 +36,13 @@ Currently in Beta Version, able to perform automated trades taking in count rule
 sudo pip install virtualenv
 ```
 
-- Create virtualenv `virtualenv env` and source into it with `source env/bin/activate`
+- Create virtualenv `virtualenv --python="$(which python2)" env` and source into it with `source env/bin/activate`
 - Verify other `python` default version is set to `2.7.*`, it has not be tested in other versions.
 - Install dependencies `pip install -r requirements.txt`
-- Verify in [Bitso](https://bitso.com/developers) to get your API keys then set then as the following environmental variables: `BITSO_API_KEY` and `BITSO_API_SECRET`.
+- Verify in [Bitso](https://bitso.com/developers) to get your API keys them set then as the following environmental variables: `BITSO_API_KEY` and `BITSO_API_SECRET`.
 - Tune the `config.json` file with the amount in Major (Currency-pairs are expressed `Major_minor`) of trades you want to perform and the percentual selling and buying bounds.
-- Now run `python main.py` to start OttoCT, if want to set to the background run `nohup python main.py > otto.log 2>&1`
-- Also, to visualize cryptos' variation run `python -m otto.plot $Major_minor` and substitute `$Major_minor` for the currency-pair you want to monitor and the Live Graph should display.
+- Now run `python main.py` to start OttoCT, if want to set it to the background run `nohup python main.py > otto.log 2>&1 &`
+- Also, to visualize cryptos' variation you can run `python -m otto.plot $Major_minor` and substitute `$Major_minor` for the currency-pair you want to monitor so the Live Graph should start displaying.
 
 
 ### TODO
