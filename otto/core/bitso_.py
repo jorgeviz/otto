@@ -612,14 +612,16 @@ class BitsoTrade(Bitso):
                         # Passing action
                         print('Not action required!')
                         continue
-                    print("#####################")
+                    print("################################################")
+                    print("################################################")
                     print('Trying to perform {} in {}'.format(_action, vp))
                     # If exceeds limits, perform order
                     self.set_market_order(vp,
                                     _action,
                                     config['rules'][vp]['major_amount'],
                                     only_check=False)  # To actually perform Orders, set False
-                    print("#####################")
+                    print("################################################")
+                    print("################################################")                    
                     # Reset Baseline
                     self.set_baseline(vp)
                     # Get Acum Balances

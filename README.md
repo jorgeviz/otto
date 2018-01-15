@@ -47,8 +47,11 @@ sudo pip install virtualenv
 
 ### TODO
 
-- Save Baselines
+- [Important](.) Add trasaction remaining verification per day
+- Save Baselines into a File
 - Plot (Baseline, Boundaries, Last Price and Weighted Average Price) in the same figure per Currency-Pair
+- Add plots from Balances and list of transactions
+- Add Email notification procedure for every day accounting
 - Tune parameters to improve algorithm performance
 - Add plots, metrics and UI to change rules
 - Implement executables for deploy in Multiple platforms

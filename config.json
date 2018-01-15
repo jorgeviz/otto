@@ -13,42 +13,42 @@
         "btc_mxn":{
             "selling_major_bound": 0.02,
             "buying_major_bound": -0.02,
-            "major_amount" : 0.0006
+            "major_amount" : 0.0020
         },
         "eth_mxn":{
             "selling_major_bound": 0.03,
             "buying_major_bound": -0.03,
-            "major_amount" : 0.009
+            "major_amount" : 0.030
         },
         "xrp_btc":{
             "selling_major_bound": 0.045,
             "buying_major_bound": -0.045,
-            "major_amount" : 3.2085
+            "major_amount" : 5.4085
         },
         "xrp_mxn":{
             "selling_major_bound": 0.045,
             "buying_major_bound": -0.045,
-            "major_amount" : 3.2916
+            "major_amount" : 5.6016
         },
         "eth_btc":{
             "selling_major_bound": 0.035,
             "buying_major_bound": -0.035,
-            "major_amount" : 0.0087
+            "major_amount" : 0.03
         },
         "bch_btc":{
-            "selling_major_bound": 0.025,
-            "buying_major_bound": -0.025,
-            "major_amount" : 0.0038
+            "selling_major_bound": 0.06,
+            "buying_major_bound": -0.06,
+            "major_amount" : 0.006
         },
         "ltc_btc":{
             "selling_major_bound": 0.045,
             "buying_major_bound": -0.045,
-            "major_amount" : 0.03616
+            "major_amount" : 0.075
         },
         "ltc_mxn":{
             "selling_major_bound": 0.045,
             "buying_major_bound": -0.045,
-            "major_amount" : 0.0374
+            "major_amount" : 0.075
         }
     }
 }
