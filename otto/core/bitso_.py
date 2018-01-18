@@ -502,7 +502,7 @@ class BitsoTrade(Bitso):
     def evaluate_rule(self, pair, rule):
         """ Method to evaluate which action must be executed after defined rules.
             * If trading_price > (base_line + rule_selling_bound) Then: sell
-            * Else if trading_price > (base_line + rule_selling_bound) Then: buy
+            * Else if trading_price < (base_line + rule_buying_bound) Then: buy
             * Else: None
 
             Params:
