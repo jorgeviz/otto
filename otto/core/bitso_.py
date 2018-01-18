@@ -501,8 +501,8 @@ class BitsoTrade(Bitso):
 
     def evaluate_rule(self, pair, rule):
         """ Method to evaluate which action must be executed after defined rules.
-            * If trading_price > (base_line + rule_selling_bound) Then: sell
-            * Else if trading_price < (base_line + rule_buying_bound) Then: buy
+            * If trading_price > (base_line + rule_buying_bound) Then: buy
+            * Else if trading_price < (base_line + rule_selling_bound) Then: sell
             * Else: None
 
             Params:
@@ -515,15 +515,15 @@ class BitsoTrade(Bitso):
             - (str | NoneType) Trading Position ('buy' | 'sell' | None)
         """
         # Boundaries
-        upper_bound = self.base_lines[pair] + (self.base_lines[pair] * rule['selling_major_bound'])
-        lower_bound = self.base_lines[pair] + (self.base_lines[pair] * rule['buying_major_bound'])
+        upper_bound = self.base_lines[pair] + (self.base_lines[pair] * rule['buying_major_bound'])
+        lower_bound = self.base_lines[pair] + (self.base_lines[pair] * rule['selling_major_bound'])
         # Selling evaluation
         if self.trade_prices[pair] > upper_bound:
-            print('Selling: {} is MORE EXPENSIVE than {}'.format(self.trade_prices[pair], self.base_lines[pair]))
-            return 'sell'
-        elif self.trade_prices[pair] < lower_bound:
-            print('Buying: {} is CHEAPER than {}'.format(self.trade_prices[pair], self.base_lines[pair]))
+            print('Buying: {} is MORE EXPENSIVE than {}'.format(self.trade_prices[pair], self.base_lines[pair]))
             return 'buy'
+        elif self.trade_prices[pair] < lower_bound:
+            print('Selling: {} is CHEAPER than {}'.format(self.trade_prices[pair], self.base_lines[pair]))
+            return 'sell'
         else:
             print('Nothing: {} is almost the same than {}'.format(self.trade_prices[pair], self.base_lines[pair]))
             print('Decision:   {}   >   {}   <    {}'.format(lower_bound, self.trade_prices[pair], upper_bound))
